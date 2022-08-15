@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="create_file_failed">Failed to create file</string>
-    <string name="save_failed">Save failed</string>
-    <string name="location_failed">Unable to get current location</string>
     <string name="unknown_failed">Unknown error</string>
     <string name="unknown_error">The server is deserted, please try again later</string>
     <string name="failed_too_much">Too many errors, please try again later</string>

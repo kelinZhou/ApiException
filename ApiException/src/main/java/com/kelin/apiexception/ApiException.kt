@@ -21,10 +21,6 @@ class ApiException(
             return context
                 ?: throw NullPointerException("You must call the ApiException.init() Method before use the ApiException")
         }
-
-        val createFileException = ApiException(999, getString(R.string.create_file_failed))
-        val ioException = ApiException(999, getString(R.string.save_failed))
-        val locationException = ApiException(999, getString(R.string.location_failed))
     }
 
 
