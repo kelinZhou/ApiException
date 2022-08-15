@@ -1,11 +1,30 @@
 package com.kelin.apiexception
 
-class ApiException(val errCode: Int, private val msg: String? = null, throwable: Throwable? = null) : Exception(msg ?: throwable?.message) {
+import android.content.Context
+import androidx.annotation.StringRes
+
+class ApiException(
+    val errCode: Int,
+    private val msg: String? = null,
+    throwable: Throwable? = null
+) : Exception(msg ?: throwable?.message) {
 
     companion object {
-        val createFileException = ApiException(999, "创建文件失败")
-        val ioException = ApiException(999, "保存失败")
-        val locationException = ApiException(999, "无法获取当前位置")
+
+        private var context: Context? = null
+
+        fun init(context: Context) {
+            this.context = context.applicationContext
+        }
+
+        internal fun getContext(): Context {
+            return context
+                ?: throw NullPointerException("You must call the ApiException.init() Method before use the ApiException")
+        }
+
+        val createFileException = ApiException(999, getString(R.string.create_file_failed))
+        val ioException = ApiException(999, getString(R.string.save_failed))
+        val locationException = ApiException(999, getString(R.string.location_failed))
     }
 
 
@@ -20,7 +39,7 @@ class ApiException(val errCode: Int, private val msg: String? = null, throwable:
     val displayMessage: String
         get() = toString()
 
-    override fun toString() = msg ?: "未知错误"
+    override fun toString() = msg ?: getString(R.string.unknown_failed)
 
     fun isUserInfoDisabled(): Boolean {
         return errCode == Error.USER_INFO_DISABLED.code
@@ -31,7 +50,7 @@ class ApiException(val errCode: Int, private val msg: String? = null, throwable:
     }
 
     fun isHttpPermissionError(): Boolean {
-        return errCode == Error.PERMISSION_ERROR.code || errCode == Error.TOKEN_INVALID.code || errCode == Error.PARSER_USER_FAILED.code
+        return errCode == Error.TOKEN_INVALID.code || errCode == Error.PARSER_USER_FAILED.code
     }
 
     fun isServerError(): Boolean {
@@ -61,86 +80,80 @@ class ApiException(val errCode: Int, private val msg: String? = null, throwable:
         /**
          * 所有未知的错误。
          */
-        UNKNOWN_ERROR(1001, "服务器开小差了，请稍后再试"),
+        UNKNOWN_ERROR(1001, getString(R.string.unknown_error)),
 
         /**
          * 当用户进行某项操作失败次数过多是抛出改异常。
          */
-        FAIL_TOO_MUCH(7001, "错误次数太多，请稍后再试"),
+        FAIL_TOO_MUCH(7001, getString(R.string.failed_too_much)),
 
         /**
          * 当用户进行某项操作过于频繁时或者服务器压力过大时抛出该异常。
          */
-        TOO_BUSY(7002, "您的操作太频繁了，请稍后再试"),
+        TOO_BUSY(7002, getString(R.string.too_busy)),
 
         /**
          * 没有绑定手机。
          */
-        NO_ACCOUNT(8000, "您还未绑定手机"),
+        NO_ACCOUNT(8000, getString(R.string.no_account)),
 
         /**
          * 网络不可用。
          */
-        NETWORK_UNAVAILABLE(8001, "网络不可用"),
+        NETWORK_UNAVAILABLE(8001, getString(R.string.network_unavailable)),
 
         /**
          * 网络错误。
          */
-        NETWORK_ERROR(8002, "网络错误"),
+        NETWORK_ERROR(8002, getString(R.string.network_error)),
 
         /**
          * 服务器异常
          */
-        SERVICE_ERROR(9001, "服务器异常"),
+        SERVICE_ERROR(9001, getString(R.string.service_error)),
 
         /**
          * 服务器无响应
          */
-        DEADLINE_EXCEEDED(9002, "服务器无响应"),
+        DEADLINE_EXCEEDED(9002, getString(R.string.service_deadline)),
 
         /**
          * 无法连接服务器
          */
-        SOCKET_EXCEPTION(9003, "无法连接服务器"),
+        SOCKET_EXCEPTION(9003, getString(R.string.connect_timeout)),
 
         /**
          * 数据解析异常。解析数据时没有获取到data或者result信息,获取解析JSON数据错误时都会抛出改异常。
          */
-        RESULT_ERROR(9003, "数据错误"),
-
-        /**
-         * 与服务器建立连接超时。
-         */
-        TIMEOUT_OUT(9004, "连接超时"),
+        RESULT_ERROR(9003, getString(R.string.data_error)),
 
         /**
          * 用户身份解析失败。
          */
-        PARSER_USER_FAILED(40005, "用户身份解析失败"),
+        PARSER_USER_FAILED(40005, getString(R.string.parser_user_failed)),
 
         /**
          * Token无效。
          */
-        TOKEN_INVALID(40003, "您还未登录"),
-
-        /**
-         * 当用户没有权限调用某个api时抛出该异常。
-         */
-        PERMISSION_ERROR(40001, "权限错误"),
+        TOKEN_INVALID(40003, getString(R.string.token_invalid)),
 
         /**
          * 账号已注销。
          */
-        LOGGED_OUT(40015, "账号已注销"),
+        LOGGED_OUT(40015, getString(R.string.logged_out)),
 
         /**
          * 用户信息已过期。
          */
-        USER_INFO_DISABLED(50000, "用户信息过期"),
+        USER_INFO_DISABLED(50000, getString(R.string.user_info_disabled)),
 
         /**
          * 当调用后台API缺少必要参数是抛出该错误。
          */
-        ARGUMENT_ERROR(405, "参数错误");
+        ARGUMENT_ERROR(-99, getString(R.string.argument_error));
     }
+}
+
+private fun getString(@StringRes res: Int): String {
+    return ApiException.getContext().getString(res)
 }
